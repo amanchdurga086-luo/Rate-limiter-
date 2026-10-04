@@ -22,5 +22,16 @@ public final class RateLimitResult {
         );
     }
 
+    public static RateLimitResult rejected(
+            long remainingTokens,
+            long retryAfterMillis) {
+
+        return new RateLimitResult(
+                false,
+                remainingTokens,
+                retryAfterMillis
+        );
+    }
+
     
 }
