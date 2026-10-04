@@ -41,5 +41,9 @@ public final class RateLimitResult {
         return remainingTokens;
     }
 
+    public long getRetryAfterMillis() {
+        return retryAfterMillis;
+    }
+
     
 }
