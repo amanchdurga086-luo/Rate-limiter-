@@ -37,5 +37,9 @@ public final class RateLimitResult {
         return allowed;
     }
 
+    public long getRemainingTokens() {
+        return remainingTokens;
+    }
+
     
 }
