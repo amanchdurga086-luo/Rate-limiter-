@@ -33,5 +33,9 @@ public final class RateLimitResult {
         );
     }
 
+    public boolean isAllowed() {
+        return allowed;
+    }
+
     
 }
