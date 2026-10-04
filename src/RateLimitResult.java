@@ -14,5 +14,13 @@ public final class RateLimitResult {
         this.retryAfterMillis = retryAfterMillis;
     }
 
+    public static RateLimitResult allowed(long remainingTokens) {
+        return new RateLimitResult(
+                true,
+                remainingTokens,
+                0
+        );
+    }
+
     
 }
