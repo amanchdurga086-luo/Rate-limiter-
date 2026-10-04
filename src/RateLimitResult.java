@@ -45,5 +45,12 @@ public final class RateLimitResult {
         return retryAfterMillis;
     }
 
-    
+    @Override
+    public String toString() {
+        return "RateLimitResult{" +
+                "allowed=" + allowed +
+                ", remainingTokens=" + remainingTokens +
+                ", retryAfterMillis=" + retryAfterMillis +
+                '}';
+    }
 }
