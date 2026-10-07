@@ -69,6 +69,29 @@ public class UserBucket {
         return RateLimitResult.rejected(
                 0,
                 retryAfterMillis);
-                
+
     }
+
+    // Adds tokens based on elapsed time.
+    private void refill() {
+
+        long now = clock.nanoTime();
+
+        long elapsedNanos = now - lastRefillNanos;
+
+        if (elapsedNanos <= 0) {
+            return;
+        }
+
+        double elapsedSeconds = elapsedNanos / 1_000_000_000.0;
+
+        double tokensToAdd = elapsedSeconds * refillRatePerSecond;
+
+        tokens = Math.min(
+                capacity,
+                tokens + tokensToAdd);
+
+        lastRefillNanos = now;
+    }
+    
 }
