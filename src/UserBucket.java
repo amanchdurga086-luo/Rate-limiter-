@@ -93,5 +93,19 @@ public class UserBucket {
 
         lastRefillNanos = now;
     }
-    
+
+    // Calculates approximately how long the caller should wait before another token becomes available.
+    private long calculateRetryAfterMillis() {
+
+        double missingTokens = 1.0 - tokens;
+
+        double seconds =
+                missingTokens / refillRatePerSecond;
+
+        return Math.max(
+                1,
+                (long) Math.ceil(seconds * 1000)
+        );
+    }
+
 }
