@@ -15,20 +15,17 @@ public class UserBucket {
 
         if (capacity <= 0) {
             throw new IllegalArgumentException(
-                    "Capacity must be greater than 0"
-            );
+                    "Capacity must be greater than 0");
         }
 
         if (refillRatePerSecond <= 0) {
             throw new IllegalArgumentException(
-                    "Refill rate must be greater than 0"
-            );
+                    "Refill rate must be greater than 0");
         }
 
         if (clock == null) {
             throw new IllegalArgumentException(
-                    "Clock cannot be null"
-            );
+                    "Clock cannot be null");
         }
 
         this.capacity = capacity;
@@ -41,4 +38,37 @@ public class UserBucket {
         this.lastRefillNanos = clock.nanoTime();
     }
 
+    /**
+     * Attempts to consume one token.
+     *
+     * synchronized is important because:
+     *
+     * refill()
+     * +
+     * check token
+     * +
+     * consume token
+     *
+     * must happen atomically.
+     */
+
+    public synchronized RateLimitResult tryConsume() {
+
+        refill();
+
+        if (tokens >= 1.0) {
+
+            tokens--;
+
+            return RateLimitResult.allowed(
+                    (long) tokens);
+        }
+
+        long retryAfterMillis = calculateRetryAfterMillis();
+
+        return RateLimitResult.rejected(
+                0,
+                retryAfterMillis);
+                
+    }
 }
