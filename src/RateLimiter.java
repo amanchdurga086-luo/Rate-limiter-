@@ -13,5 +13,7 @@ public class RateLimiter {
         this.strategy = strategy;
     }
 
-    
+    public RateLimitResult allow(String key) {
+        return strategy.allow(key);
+    }
 }
