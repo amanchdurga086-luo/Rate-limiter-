@@ -35,5 +35,25 @@ public class TokenBucketStrategy implements RateLimiterStrategy {
         this.buckets = new ConcurrentHashMap<>();
     }
 
-    
+    @Override
+    public RateLimitResult allow(String key) {
+
+        if (key == null || key.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Rate limit key cannot be null or empty");
+        }
+
+        /*
+         * computeIfAbsent ensures that a bucket is created
+         * safely when multiple threads request the same key.
+         */
+        UserBucket bucket = buckets.computeIfAbsent(
+                key,
+                k -> new UserBucket(
+                        capacity,
+                        refillRatePerSecond,
+                        clock));
+
+        return bucket.tryConsume();
+    }
 }
