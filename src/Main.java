@@ -21,6 +21,19 @@ public class Main {
 
                 RateLimiter rateLimiter = new RateLimiter(strategy);
 
+                // --------------------------------------------------
+                // Single-thread test
+                // --------------------------------------------------
+
+                System.out.println("----- Single Thread Test -----");
+
+                for (int i = 1; i <= 7; i++) {
+
+                        RateLimitResult result = rateLimiter.allow("user-1");
+
+                        System.out.println("Request " + i + " -> " + result);
+                }
+
         }
 
 }
