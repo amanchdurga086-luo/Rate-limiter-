@@ -48,6 +48,25 @@ public class Main {
                 System.out.println(
                                 "After 2 seconds -> " + result);
 
+                // --------------------------------------------------
+                // Different users
+                // --------------------------------------------------
+
+                System.out.println(
+                                "\n----- Multiple Users -----");
+
+                System.out.println(
+                                "User 1 -> " +
+                                                rateLimiter.allow("user-1"));
+
+                System.out.println(
+                                "User 2 -> " +
+                                                rateLimiter.allow("user-2"));
+
+                System.out.println(
+                                "User 3 -> " +
+                                                rateLimiter.allow("user-3"));
+
         }
 
 }
