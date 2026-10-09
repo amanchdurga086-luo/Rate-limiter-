@@ -34,6 +34,20 @@ public class Main {
                         System.out.println("Request " + i + " -> " + result);
                 }
 
+                // --------------------------------------------------
+                // Wait for tokens to refill
+                // --------------------------------------------------
+
+                System.out.println(
+                                "\nWaiting for tokens to refill...");
+
+                Thread.sleep(2000);
+
+                RateLimitResult result = rateLimiter.allow("user-1");
+
+                System.out.println(
+                                "After 2 seconds -> " + result);
+
         }
 
 }
