@@ -3,50 +3,35 @@ public class Main {
         public static void main(String[] args)
                         throws InterruptedException {
 
-                long bucketCapacity = 5;
-
-                // 2 tokens will be generated every second.
-                double refillRatePerSecond = 2.0;
-
-                // --------------------------------------------------
-                // Dependencies
-                // --------------------------------------------------
-
                 Clock clock = new SystemClock();
 
-                RateLimiterStrategy strategy = new TokenBucketStrategy(
-                                bucketCapacity,
-                                refillRatePerSecond,
+                RateLimiterStrategy strategy = new LeakyBucketStrategy(
+                                5, // Maximum outstanding requests
+                                2.0, // Leak 2 requests per second
                                 clock);
 
                 RateLimiter rateLimiter = new RateLimiter(strategy);
 
-                // --------------------------------------------------
-                // Single-thread test
-                // --------------------------------------------------
-
-                System.out.println("----- Single Thread Test -----");
+                System.out.println("----- Initial Requests -----");
 
                 for (int i = 1; i <= 7; i++) {
 
                         RateLimitResult result = rateLimiter.allow("user-1");
 
-                        System.out.println("Request " + i + " -> " + result);
+                        System.out.println(
+                                        "Request " + i + " -> " + result);
                 }
 
-                // --------------------------------------------------
-                // Wait for tokens to refill
-                // --------------------------------------------------
-
                 System.out.println(
-                                "\nWaiting for tokens to refill...");
+                                "\nWaiting for capacity to become available...");
 
                 Thread.sleep(2000);
 
-                RateLimitResult result = rateLimiter.allow("user-1");
+                // RateLimitResult result =
+                // rateLimiter.allow("user-1");
 
                 System.out.println(
-                                "After 2 seconds -> " + result);
+                                "After 2 seconds -> ");
 
                 // --------------------------------------------------
                 // Different users
@@ -77,7 +62,6 @@ public class Main {
                 runConcurrentTest(rateLimiter);
         }
 
-        // same user on different threads simultaneously, to test thread safety of the rate limiter.
         private static void runConcurrentTest(
                         RateLimiter rateLimiter)
                         throws InterruptedException {
@@ -96,7 +80,7 @@ public class Main {
 
                                 System.out.println(
                                                 "Thread " +
-                                                        threadNumber +
+                                                                threadNumber +
                                                                 " -> " +
                                                                 (result.isAllowed()
                                                                                 ? "ALLOWED"
@@ -115,5 +99,4 @@ public class Main {
                         thread.join();
                 }
         }
-
 }
