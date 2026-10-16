@@ -67,5 +67,29 @@ public class LeakyBucket {
         );
     }
 
+    private void leak() {
+
+        long now = clock.nanoTime();
+
+        long elapsedNanos = now - lastLeakNanos;
+
+        if (elapsedNanos <= 0) {
+            return;
+        }
+
+        double elapsedSeconds =
+                elapsedNanos / 1_000_000_000.0;
+
+        double leaked =
+                elapsedSeconds * leakRatePerSecond;
+
+        waterLevel = Math.max(
+                0.0,
+                waterLevel - leaked
+        );
+
+        lastLeakNanos = now;
+    }
+
     
 }
