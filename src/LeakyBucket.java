@@ -39,5 +39,33 @@ public class LeakyBucket {
         this.lastLeakNanos = clock.nanoTime();
     }
 
+    public synchronized RateLimitResult tryConsume() {
+
+        leak();
+
+        if (waterLevel + 1.0 <= capacity) {
+
+            waterLevel += 1.0;
+
+            long remainingCapacity =
+                    (long) Math.floor(capacity - waterLevel);
+
+            return RateLimitResult.allowed(
+                    remainingCapacity
+            );
+        }
+
+        long retryAfterMillis =
+                calculateRetryAfterMillis();
+
+        long remainingCapacity =
+                (long) Math.floor(capacity - waterLevel);
+
+        return RateLimitResult.rejected(
+                remainingCapacity,
+                retryAfterMillis
+        );
+    }
+
     
 }
