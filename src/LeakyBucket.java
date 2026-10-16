@@ -91,5 +91,16 @@ public class LeakyBucket {
         lastLeakNanos = now;
     }
 
-    
+    private long calculateRetryAfterMillis() {
+
+        double excessWork = waterLevel + 1.0 - capacity;
+
+        double seconds =
+                excessWork / leakRatePerSecond;
+
+        return Math.max(
+                1,
+                (long) Math.ceil(seconds * 1000)
+        );
+    }
 }
