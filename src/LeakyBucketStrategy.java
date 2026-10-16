@@ -40,5 +40,24 @@ public class LeakyBucketStrategy
         this.buckets = new ConcurrentHashMap<>();
     }
 
-    
+    @Override
+    public RateLimitResult allow(String key) {
+
+        if (key == null || key.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Rate-limit key cannot be null or empty"
+            );
+        }
+
+        LeakyBucket bucket = buckets.computeIfAbsent(
+                key,
+                k -> new LeakyBucket(
+                        capacity,
+                        leakRatePerSecond,
+                        clock
+                )
+        );
+
+        return bucket.tryConsume();
+    }
 }
