@@ -1,102 +1,57 @@
+package ratelimiter;
+
+import ratelimiter.clock.Clock;
+import ratelimiter.clock.SystemClock;
+
 public class Main {
 
-        public static void main(String[] args)
-                        throws InterruptedException {
+    private static final long CAPACITY = 5;
+    private static final double RATE_PER_SECOND = 2.0;
 
-                Clock clock = new SystemClock();
+    public static void main(String[] args) {
 
-                RateLimiterStrategy strategy = new LeakyBucketStrategy(
-                                5, // Maximum outstanding requests
-                                2.0, // Leak 2 requests per second
-                                clock);
+        // Change this to switch algorithms.
+        RateLimiterType type = RateLimiterType.TOKEN_BUCKET;
 
-                RateLimiter rateLimiter = new RateLimiter(strategy);
+        Clock clock = new SystemClock();
 
-                System.out.println("----- Initial Requests -----");
+        RateLimiter rateLimiter = RateLimiterFactory.create(
+                type,
+                CAPACITY,
+                RATE_PER_SECOND,
+                clock
+        );
 
-                for (int i = 1; i <= 7; i++) {
+        System.out.println("Algorithm: " + type);
+        System.out.println("Capacity: " + CAPACITY);
+        System.out.println("Rate: " + RATE_PER_SECOND);
+        System.out.println("--------------------------------");
 
-                        RateLimitResult result = rateLimiter.allow("user-1");
+        for (int i = 1; i <= 7; i++) {
 
-                        System.out.println(
-                                        "Request " + i + " -> " + result);
-                }
+            RateLimitResult result =
+                    rateLimiter.allow("user-1");
 
-                System.out.println(
-                                "\nWaiting for capacity to become available...");
-
-                Thread.sleep(2000);
-
-                // RateLimitResult result =
-                // rateLimiter.allow("user-1");
-
-                System.out.println(
-                                "After 2 seconds -> ");
-
-                // --------------------------------------------------
-                // Different users
-                // --------------------------------------------------
-
-                System.out.println(
-                                "\n----- Multiple Users -----");
-
-                System.out.println(
-                                "User 1 -> " +
-                                                rateLimiter.allow("user-1"));
-
-                System.out.println(
-                                "User 2 -> " +
-                                                rateLimiter.allow("user-2"));
-
-                System.out.println(
-                                "User 3 -> " +
-                                                rateLimiter.allow("user-3"));
-
-                // --------------------------------------------------
-                // Concurrent test
-                // --------------------------------------------------
-
-                System.out.println(
-                                "\n----- Concurrent Test -----");
-
-                runConcurrentTest(rateLimiter);
+            System.out.println(
+                    "Request " + i + " -> " + result
+            );
         }
 
-        private static void runConcurrentTest(
-                        RateLimiter rateLimiter)
-                        throws InterruptedException {
+        System.out.println("\nWaiting for 2 seconds...");
 
-                int numberOfThreads = 10;
-
-                Thread[] threads = new Thread[numberOfThreads];
-
-                for (int i = 0; i < numberOfThreads; i++) {
-
-                        int threadNumber = i + 1;
-
-                        threads[i] = new Thread(() -> {
-
-                                RateLimitResult result = rateLimiter.allow("concurrent-user");
-
-                                System.out.println(
-                                                "Thread " +
-                                                                threadNumber +
-                                                                " -> " +
-                                                                (result.isAllowed()
-                                                                                ? "ALLOWED"
-                                                                                : "BLOCKED"));
-
-                        });
-                }
-
-                // Start all threads.
-                for (Thread thread : threads) {
-                        thread.start();
-                }
-
-                // Wait for all threads.
-                for (Thread thread : threads) {
-                        thread.join();
-                }
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.out.println("Main thread interrupted.");
+            return;
         }
+
+        RateLimitResult result =
+                rateLimiter.allow("user-1");
+
+        System.out.println(
+                "After waiting -> " + result
+        );
+    }
 }
