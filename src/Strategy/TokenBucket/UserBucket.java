@@ -1,8 +1,12 @@
+package Strategy.TokenBucket;
+
+import time.Clock;
+import Result.RateLimitResult;
+
 public class UserBucket {
 
     private final long capacity;
     private final double refillRatePerSecond;
-    // The clock reference can be assigned only once
     private final Clock clock;
 
     private double tokens;
@@ -94,18 +98,18 @@ public class UserBucket {
         lastRefillNanos = now;
     }
 
-    // Calculates approximately how long the caller should wait before another token becomes available.
+    // Calculates approximately how long the caller should wait before another token
+    // becomes available.
     private long calculateRetryAfterMillis() {
 
         double missingTokens = 1.0 - tokens;
 
-        double seconds =
-                missingTokens / refillRatePerSecond;
+        double seconds = missingTokens / refillRatePerSecond;
 
         return Math.max(
                 1,
                 (long) Math.ceil(seconds * 1000)
-        );
+            );
     }
 
 }

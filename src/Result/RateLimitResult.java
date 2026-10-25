@@ -1,34 +1,36 @@
+package Result;
+
 public final class RateLimitResult {
 
     private final boolean allowed;
-    private final long remainingTokens;
+    private final long remainingCapacity;
     private final long retryAfterMillis;
 
     private RateLimitResult(
             boolean allowed,
-            long remainingTokens,
+            long remainingCapacity,
             long retryAfterMillis) {
 
         this.allowed = allowed;
-        this.remainingTokens = remainingTokens;
+        this.remainingCapacity = remainingCapacity;
         this.retryAfterMillis = retryAfterMillis;
     }
 
-    public static RateLimitResult allowed(long remainingTokens) {
+    public static RateLimitResult allowed(long remainingCapacity) {
         return new RateLimitResult(
                 true,
-                remainingTokens,
+                remainingCapacity,
                 0
         );
     }
 
     public static RateLimitResult rejected(
-            long remainingTokens,
+            long remainingCapacity,
             long retryAfterMillis) {
 
         return new RateLimitResult(
                 false,
-                remainingTokens,
+                remainingCapacity,
                 retryAfterMillis
         );
     }
@@ -37,8 +39,8 @@ public final class RateLimitResult {
         return allowed;
     }
 
-    public long getRemainingTokens() {
-        return remainingTokens;
+    public long getRemainingCapacity() {
+        return remainingCapacity;
     }
 
     public long getRetryAfterMillis() {
@@ -49,7 +51,7 @@ public final class RateLimitResult {
     public String toString() {
         return "RateLimitResult{" +
                 "allowed=" + allowed +
-                ", remainingTokens=" + remainingTokens +
+                ", remainingCapacity=" + remainingCapacity +
                 ", retryAfterMillis=" + retryAfterMillis +
                 '}';
     }

@@ -1,7 +1,8 @@
-package ratelimiter;
 
-import ratelimiter.clock.Clock;
-import ratelimiter.clock.SystemClock;
+import Result.RateLimitResult;
+import time.Clock;
+import time.SystemClock;
+import util.RateLimiter;
 
 public class Main {
 
