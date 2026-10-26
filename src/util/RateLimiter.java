@@ -21,4 +21,8 @@ public class RateLimiter {
     public RateLimitResult allow(String key) {
         return strategy.allow(key);
     }
+
+    public long getRemainingCapacity(String key) {
+        return strategy.getRemainingCapacity(key);
+    }
 }

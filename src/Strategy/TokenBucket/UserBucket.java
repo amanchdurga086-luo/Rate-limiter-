@@ -112,4 +112,10 @@ public class UserBucket {
             );
     }
 
+    public synchronized long getRemainingCapacity() {
+        refill();
+
+        return (long) Math.floor(tokens);
+    }
+
 }

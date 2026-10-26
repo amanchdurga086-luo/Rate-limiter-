@@ -61,4 +61,22 @@ public class TokenBucketStrategy implements RateLimiterStrategy {
 
         return bucket.tryConsume();
     }
+
+    @Override
+    public long getRemainingCapacity(String key) {
+        if (key == null || key.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Rate-limit key cannot be empty"
+            );
+        }
+
+        UserBucket bucket = buckets.computeIfAbsent(
+                key,
+                k -> new UserBucket(
+                        capacity,
+                        refillRatePerSecond,
+                        clock));
+
+        return bucket.getRemainingCapacity();
+    }
 }

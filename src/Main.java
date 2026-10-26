@@ -1,8 +1,9 @@
-
 import Result.RateLimitResult;
 import time.Clock;
 import time.SystemClock;
 import util.RateLimiter;
+import util.RateLimiterFactory;
+import util.RateLimiterType;
 
 public class Main {
 
@@ -20,8 +21,7 @@ public class Main {
                 type,
                 CAPACITY,
                 RATE_PER_SECOND,
-                clock
-        );
+                clock);
 
         System.out.println("Algorithm: " + type);
         System.out.println("Capacity: " + CAPACITY);
@@ -30,12 +30,10 @@ public class Main {
 
         for (int i = 1; i <= 7; i++) {
 
-            RateLimitResult result =
-                    rateLimiter.allow("user-1");
+            RateLimitResult result = rateLimiter.allow("user-1");
 
             System.out.println(
-                    "Request " + i + " -> " + result
-            );
+                    "Request " + i + " -> " + result);
         }
 
         System.out.println("\nWaiting for 2 seconds...");
@@ -48,11 +46,8 @@ public class Main {
             return;
         }
 
-        RateLimitResult result =
-                rateLimiter.allow("user-1");
-
         System.out.println(
-                "After waiting -> " + result
-        );
+                "After 2 requests: " +
+                        rateLimiter.getRemainingCapacity("user-1"));
     }
 }
