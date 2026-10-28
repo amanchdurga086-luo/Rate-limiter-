@@ -42,4 +42,28 @@ public class FixedWindowCounter {
         this.currentWindow = getWindowId(clock.nanoTime());
         this.requestCount = 0;
     }
+
+    public synchronized RateLimitResult tryAcquire() {
+
+        long now = clock.nanoTime();
+        long windowId = getWindowId(now);
+
+        resetIfWindowChanged(windowId);
+
+        if (requestCount < limit) {
+
+            requestCount++;
+
+            return RateLimitResult.allowed(
+                    limit - requestCount
+            );
+        }
+
+        return RateLimitResult.rejected(
+                0,
+                calculateRetryAfterMillis(now)
+        );
+    }
+
+    
 }
