@@ -65,5 +65,15 @@ public class FixedWindowCounter {
         );
     }
 
+    public synchronized long getRemainingCapacity() {
+
+        long now = clock.nanoTime();
+        long windowId = getWindowId(now);
+
+        resetIfWindowChanged(windowId);
+
+        return limit - requestCount;
+    }
+
     
 }
