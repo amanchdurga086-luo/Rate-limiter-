@@ -79,5 +79,13 @@ public class FixedWindowCounter {
         return Math.floorDiv(now, windowSizeNanos);
     }
 
+    private void resetIfWindowChanged(long windowId) {
+
+        if (windowId != currentWindow) {
+            currentWindow = windowId;
+            requestCount = 0;
+        }
+    }
+
     
 }
