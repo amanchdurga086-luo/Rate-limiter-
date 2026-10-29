@@ -87,5 +87,19 @@ public class FixedWindowCounter {
         }
     }
 
-    
+    private long calculateRetryAfterMillis(long now) {
+
+        long elapsedInWindow =
+                Math.floorMod(now, windowSizeNanos);
+
+        long remainingNanos =
+                windowSizeNanos - elapsedInWindow;
+
+        return Math.max(
+                1,
+                (long) Math.ceil(
+                        remainingNanos / 1_000_000.0
+                )
+        );
+    }
 }
