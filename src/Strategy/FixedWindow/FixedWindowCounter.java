@@ -75,5 +75,9 @@ public class FixedWindowCounter {
         return limit - requestCount;
     }
 
+    private long getWindowId(long now) {
+        return Math.floorDiv(now, windowSizeNanos);
+    }
+
     
 }
