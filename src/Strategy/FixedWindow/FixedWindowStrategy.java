@@ -78,5 +78,12 @@ public class FixedWindowStrategy
         return counter.getRemainingCapacity();
     }
 
-    
+    private void validateKey(String key) {
+
+        if (key == null || key.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Rate-limit key cannot be empty"
+            );
+        }
+    }
 }
