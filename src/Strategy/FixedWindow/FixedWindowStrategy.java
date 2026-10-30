@@ -46,5 +46,23 @@ public class FixedWindowStrategy
         this.counters = new ConcurrentHashMap<>();
     }
 
+    @Override
+    public RateLimitResult allow(String key) {
+
+        validateKey(key);
+
+        FixedWindowCounter counter =
+                counters.computeIfAbsent(
+                        key,
+                        k -> new FixedWindowCounter(
+                                limit,
+                                windowSizeNanos,
+                                clock
+                        )
+                );
+
+        return counter.tryAcquire();
+    }
+
     
 }
