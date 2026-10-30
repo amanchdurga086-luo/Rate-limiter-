@@ -64,5 +64,19 @@ public class FixedWindowStrategy
         return counter.tryAcquire();
     }
 
+    @Override
+    public long getRemainingCapacity(String key) {
+
+        validateKey(key);
+
+        FixedWindowCounter counter = counters.get(key);
+
+        if (counter == null) {
+            return limit;
+        }
+
+        return counter.getRemainingCapacity();
+    }
+
     
 }
