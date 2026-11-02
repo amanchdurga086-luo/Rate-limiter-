@@ -1,11 +1,15 @@
 package util;
 
+import config.TokenBucketConfig;
+import config.LeakyBucketConfig;
+import config.FixedWindowConfig;
+
 import time.Clock;
-import Strategy.LeakyBucket.LeakyBucketStrategy;
-import Strategy.TokenBucket.TokenBucketStrategy;
+
 import Strategy.RateLimiterStrategy;
-
-
+import Strategy.TokenBucket.TokenBucketStrategy;
+import Strategy.LeakyBucket.LeakyBucketStrategy;
+import Strategy.fixedwindow.FixedWindowStrategy;
 
 public final class RateLimiterFactory {
 
@@ -14,42 +18,43 @@ public final class RateLimiterFactory {
     }
 
     public static RateLimiter create(
-            RateLimiterType type,
-            long capacity,
-            double ratePerSecond,
+            TokenBucketConfig config,
             Clock clock) {
 
-        if (type == null) {
-            throw new IllegalArgumentException(
-                    "Rate limiter type cannot be null"
-            );
-        }
-
-        RateLimiterStrategy strategy;
-
-        switch (type) {
-
-            case TOKEN_BUCKET:
-                strategy = new TokenBucketStrategy(
-                        capacity,
-                        ratePerSecond,
+        RateLimiterStrategy strategy =
+                new TokenBucketStrategy(
+                        config.getCapacity(),
+                        config.getRefillRatePerSecond(),
                         clock
                 );
-                break;
 
-            case LEAKY_BUCKET:
-                strategy = new LeakyBucketStrategy(
-                        capacity,
-                        ratePerSecond,
+        return new RateLimiter(strategy);
+    }
+
+    public static RateLimiter create(
+            LeakyBucketConfig config,
+            Clock clock) {
+
+        RateLimiterStrategy strategy =
+                new LeakyBucketStrategy(
+                        config.getCapacity(),
+                        config.getLeakRatePerSecond(),
                         clock
                 );
-                break;
 
-            default:
-                throw new IllegalArgumentException(
-                        "Unsupported rate limiter type: " + type
+        return new RateLimiter(strategy);
+    }
+
+    public static RateLimiter create(
+            FixedWindowConfig config,
+            Clock clock) {
+
+        RateLimiterStrategy strategy =
+                new FixedWindowStrategy(
+                        config.getLimit(),
+                        config.getWindowSizeNanos(),
+                        clock
                 );
-        }
 
         return new RateLimiter(strategy);
     }
