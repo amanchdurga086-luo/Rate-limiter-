@@ -44,5 +44,4 @@ public class SlidingWindowCounter {
         this.previousWindowCount = 0;
     }
 
-    
 }
