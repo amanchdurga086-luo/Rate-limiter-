@@ -70,5 +70,28 @@ public class SlidingWindowCounter {
         return true;
     }
 
+    public synchronized long getRemainingCapacity() {
+
+        long now = clock.nanoTime();
+
+        updateWindow(now);
+
+        long elapsedNanos =
+            Math.floorMod(now, windowSizeNanos);
+
+        double previousWeight =
+            (double) (windowSizeNanos - elapsedNanos)
+                / windowSizeNanos;
+
+        double estimatedCount =
+            currentWindowCount +
+            previousWindowCount * previousWeight;
+
+        return Math.max(
+            0,
+            (long) Math.floor(limit - estimatedCount)
+        );
+    }
+
     
 }
