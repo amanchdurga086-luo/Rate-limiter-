@@ -44,4 +44,31 @@ public class SlidingWindowCounter {
         this.previousWindowCount = 0;
     }
 
+    public synchronized boolean tryAcquire() {
+
+        long now = clock.nanoTime();
+
+        updateWindow(now);
+
+        long elapsedNanos =
+            Math.floorMod(now, windowSizeNanos);
+
+        double previousWeight =
+            (double) (windowSizeNanos - elapsedNanos)
+                / windowSizeNanos;
+
+        double estimatedCount =
+            currentWindowCount +
+            previousWindowCount * previousWeight;
+
+        if (estimatedCount + 1 > limit) {
+            return false;
+        }
+
+        currentWindowCount++;
+
+        return true;
+    }
+
+    
 }
