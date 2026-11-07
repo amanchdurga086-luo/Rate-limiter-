@@ -93,5 +93,30 @@ public class SlidingWindowCounter {
         );
     }
 
-    
+    private void updateWindow(long now) {
+
+        long newWindow =
+            Math.floorDiv(now, windowSizeNanos);
+
+        if (newWindow == currentWindow) {
+            return;
+        }
+
+        long windowsPassed =
+            newWindow - currentWindow;
+
+        if (windowsPassed == 1) {
+
+            previousWindowCount = currentWindowCount;
+
+        } else {
+
+            // More than one window has passed.
+            // The previous window is no longer relevant.
+            previousWindowCount = 0;
+        }
+
+        currentWindowCount = 0;
+        currentWindow = newWindow;
+    }
 }
