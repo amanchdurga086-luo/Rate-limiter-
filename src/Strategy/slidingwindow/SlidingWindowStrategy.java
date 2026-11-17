@@ -89,5 +89,9 @@ public class SlidingWindowStrategy implements RateLimiterStrategy {
         return counter.getRemainingCapacity();
     }
 
-    
+    private long calculateRetryAfter(
+            SlidingWindowCounter counter) {
+
+        return windowSizeNanos / 1_000_000;
+    }
 }
