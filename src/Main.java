@@ -46,7 +46,7 @@ public class Main {
         testSingleThread(
             "Token Bucket",
             () -> RateLimiterFactory.create(
-                new TokenBucketConfig(3, 1.0), CLOCK),
+                new TokenBucketConfig(0, 1.0), CLOCK),
             "user1",
             3
         );

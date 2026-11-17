@@ -42,5 +42,33 @@ public class SlidingWindowStrategy implements RateLimiterStrategy {
         this.clock = clock;
     }
 
-    
+    @Override  
+    public RateLimitResult allow(String key) {
+
+        if (key == null || key.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                "Key cannot be null or empty");
+        }
+
+        SlidingWindowCounter counter =
+            counters.computeIfAbsent(
+                key,
+                k -> new SlidingWindowCounter(
+                    limit,
+                    windowSizeNanos,
+                    clock
+                )
+            );
+
+        if (counter.tryAcquire()) {
+            return RateLimitResult.allowed(
+                counter.getRemainingCapacity()
+            );
+        }
+
+        return RateLimitResult.rejected(
+            counter.getRemainingCapacity(),
+            calculateRetryAfter(counter)
+        );
+    }
 }
