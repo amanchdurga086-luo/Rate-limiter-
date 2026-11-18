@@ -26,5 +26,13 @@ class TokenBucketStrategyTest {
         );
     }
 
+    @Test
+    void shouldAllowRequestsWithinCapacity() {
+
+        assertTrue(strategy.allow("user1").isAllowed());
+        assertTrue(strategy.allow("user1").isAllowed());
+        assertTrue(strategy.allow("user1").isAllowed());
+    }
+
     
 }
