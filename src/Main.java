@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import config.TokenBucketConfig;
 import config.LeakyBucketConfig;
 import config.FixedWindowConfig;
+import config.SlidingWindowConfig;
 
 import time.Clock;
 import time.SystemClock;
@@ -28,6 +29,7 @@ public class Main {
         testTokenBucket();
         testLeakyBucket();
         testFixedWindow();
+        testSlidingWindow();
 
         System.out.println("\n======================================");
         System.out.println("       ALL TESTS COMPLETED");
@@ -44,38 +46,34 @@ public class Main {
 
         // Single-thread test
         testSingleThread(
-            "Token Bucket",
-            () -> RateLimiterFactory.create(
-                new TokenBucketConfig(0, 1.0), CLOCK),
-            "user1",
-            3
-        );
+                "Token Bucket",
+                () -> RateLimiterFactory.create(
+                        new TokenBucketConfig(3, 1.0), CLOCK),
+                "user1",
+                3);
 
         // Waiting / refill test
         testWaiting(
-            "Token Bucket",
-            () -> RateLimiterFactory.create(
-                new TokenBucketConfig(2, 1.0), CLOCK),
-            "user1",
-            2,
-            1100
-        );
+                "Token Bucket",
+                () -> RateLimiterFactory.create(
+                        new TokenBucketConfig(2, 1.0), CLOCK),
+                "user1",
+                2,
+                1100);
 
         // Different users test
         testDifferentUsers(
-            "Token Bucket",
-            () -> RateLimiterFactory.create(
-                new TokenBucketConfig(2, 1.0), CLOCK),
-            2
-        );
+                "Token Bucket",
+                () -> RateLimiterFactory.create(
+                        new TokenBucketConfig(2, 1.0), CLOCK),
+                2);
 
         // Concurrent test
         testConcurrent(
-            "Token Bucket",
-            () -> RateLimiterFactory.create(
-                new TokenBucketConfig(50, 0.000000001), CLOCK),
-            50
-        );
+                "Token Bucket",
+                () -> RateLimiterFactory.create(
+                        new TokenBucketConfig(50, 0.000000001), CLOCK),
+                50);
     }
 
     // ==========================================
@@ -88,38 +86,34 @@ public class Main {
 
         // Single-thread test
         testSingleThread(
-            "Leaky Bucket",
-            () -> RateLimiterFactory.create(
-                new LeakyBucketConfig(3, 1.0), CLOCK),
-            "user1",
-            3
-        );
+                "Leaky Bucket",
+                () -> RateLimiterFactory.create(
+                        new LeakyBucketConfig(3, 1.0), CLOCK),
+                "user1",
+                3);
 
         // Waiting / leaking test
         testWaiting(
-            "Leaky Bucket",
-            () -> RateLimiterFactory.create(
-                new LeakyBucketConfig(2, 1.0), CLOCK),
-            "user1",
-            2,
-            1100
-        );
+                "Leaky Bucket",
+                () -> RateLimiterFactory.create(
+                        new LeakyBucketConfig(2, 1.0), CLOCK),
+                "user1",
+                2,
+                1100);
 
         // Different users test
         testDifferentUsers(
-            "Leaky Bucket",
-            () -> RateLimiterFactory.create(
-                new LeakyBucketConfig(2, 1.0), CLOCK),
-            2
-        );
+                "Leaky Bucket",
+                () -> RateLimiterFactory.create(
+                        new LeakyBucketConfig(2, 1.0), CLOCK),
+                2);
 
         // Concurrent test
         testConcurrent(
-            "Leaky Bucket",
-            () -> RateLimiterFactory.create(
-                new LeakyBucketConfig(50, 0.000000001), CLOCK),
-            50
-        );
+                "Leaky Bucket",
+                () -> RateLimiterFactory.create(
+                        new LeakyBucketConfig(50, 0.000000001), CLOCK),
+                50);
     }
 
     // ==========================================
@@ -132,38 +126,83 @@ public class Main {
 
         // Single-thread test
         testSingleThread(
-            "Fixed Window",
-            () -> RateLimiterFactory.create(
-                new FixedWindowConfig(3, 10, TimeUnit.SECONDS), CLOCK),
-            "user1",
-            3
-        );
+                "Fixed Window",
+                () -> RateLimiterFactory.create(
+                        new FixedWindowConfig(3, 10, TimeUnit.SECONDS), CLOCK),
+                "user1",
+                3);
 
         // Waiting / window reset test
         testWaiting(
-            "Fixed Window",
-            () -> RateLimiterFactory.create(
-                new FixedWindowConfig(2, 2, TimeUnit.SECONDS), CLOCK),
-            "user1",
-            2,
-            2200
-        );
+                "Fixed Window",
+                () -> RateLimiterFactory.create(
+                        new FixedWindowConfig(2, 2, TimeUnit.SECONDS), CLOCK),
+                "user1",
+                2,
+                2200);
 
         // Different users test
         testDifferentUsers(
-            "Fixed Window",
-            () -> RateLimiterFactory.create(
-                new FixedWindowConfig(2, 10, TimeUnit.SECONDS), CLOCK),
-            2
-        );
+                "Fixed Window",
+                () -> RateLimiterFactory.create(
+                        new FixedWindowConfig(2, 10, TimeUnit.SECONDS), CLOCK),
+                2);
 
         // Concurrent test
         testConcurrent(
-            "Fixed Window",
-            () -> RateLimiterFactory.create(
-                new FixedWindowConfig(50, 1, TimeUnit.MINUTES), CLOCK),
-            50
-        );
+                "Fixed Window",
+                () -> RateLimiterFactory.create(
+                        new FixedWindowConfig(50, 1, TimeUnit.MINUTES), CLOCK),
+                50);
+    }
+
+    // ==========================================
+    // FIXED WINDOW TESTS
+    // ==========================================
+
+    private static void testSlidingWindow()
+            throws InterruptedException {
+
+        System.out.println("\n\n========== SLIDING WINDOW ==========");
+
+        // Single-thread test
+        testSingleThread(
+                "Sliding Window",
+                () -> RateLimiterFactory.create(
+                        new SlidingWindowConfig(
+                                3, 10, TimeUnit.SECONDS),
+                        CLOCK),
+                "user1",
+                3);
+
+        // Waiting test
+        testWaiting(
+                "Sliding Window",
+                () -> RateLimiterFactory.create(
+                        new SlidingWindowConfig(
+                                2, 2, TimeUnit.SECONDS),
+                        CLOCK),
+                "user1",
+                2,
+                2200);
+
+        // Different users test
+        testDifferentUsers(
+                "Sliding Window",
+                () -> RateLimiterFactory.create(
+                        new SlidingWindowConfig(
+                                2, 10, TimeUnit.SECONDS),
+                        CLOCK),
+                2);
+
+        // Concurrent test
+        testConcurrent(
+                "Sliding Window",
+                () -> RateLimiterFactory.create(
+                        new SlidingWindowConfig(
+                                50, 1, TimeUnit.MINUTES),
+                        CLOCK),
+                50);
     }
 
     // ==========================================
@@ -171,10 +210,10 @@ public class Main {
     // ==========================================
 
     private static void testSingleThread(
-        String name,
-        Supplier<RateLimiter> limiterSupplier,
-        String user,
-        int expectedAllowed) {
+            String name,
+            Supplier<RateLimiter> limiterSupplier,
+            String user,
+            int expectedAllowed) {
 
         System.out.println("\n--- " + name + " : Single Thread Test ---");
 
@@ -200,9 +239,8 @@ public class Main {
         System.out.println("Rejected: " + rejected);
 
         printResult(
-            allowed == expectedAllowed &&
-            rejected == 2
-        );
+                allowed == expectedAllowed &&
+                        rejected == 2);
     }
 
     // ==========================================
@@ -210,11 +248,11 @@ public class Main {
     // ==========================================
 
     private static void testWaiting(
-        String name,
-        Supplier<RateLimiter> limiterSupplier,
-        String user,
-        int capacity,
-        long waitMillis) throws InterruptedException {
+            String name,
+            Supplier<RateLimiter> limiterSupplier,
+            String user,
+            int capacity,
+            long waitMillis) throws InterruptedException {
 
         System.out.println("\n--- " + name + " : Waiting Test ---");
 
@@ -228,23 +266,22 @@ public class Main {
         boolean rejected = !limiter.allow(user).isAllowed();
 
         System.out.println("Request after exhausting capacity: "
-            + (rejected ? "REJECTED" : "UNEXPECTEDLY ALLOWED"));
+                + (rejected ? "REJECTED" : "UNEXPECTEDLY ALLOWED"));
 
         System.out.println("Remaining before waiting: "
-            + limiter.getRemainingCapacity(user));
+                + limiter.getRemainingCapacity(user));
 
         System.out.println("Waiting for " + waitMillis + " ms...");
 
         Thread.sleep(waitMillis);
 
         System.out.println("Remaining after waiting: "
-            + limiter.getRemainingCapacity(user));
+                + limiter.getRemainingCapacity(user));
 
-        boolean allowedAfterWaiting =
-            limiter.allow(user).isAllowed();
+        boolean allowedAfterWaiting = limiter.allow(user).isAllowed();
 
         System.out.println("Request after waiting: "
-            + (allowedAfterWaiting ? "ALLOWED" : "REJECTED"));
+                + (allowedAfterWaiting ? "ALLOWED" : "REJECTED"));
 
         printResult(rejected && allowedAfterWaiting);
     }
@@ -254,9 +291,9 @@ public class Main {
     // ==========================================
 
     private static void testDifferentUsers(
-        String name,
-        Supplier<RateLimiter> limiterSupplier,
-        int capacity) {
+            String name,
+            Supplier<RateLimiter> limiterSupplier,
+            int capacity) {
 
         System.out.println("\n--- " + name + " : Different Users Test ---");
 
@@ -286,9 +323,8 @@ public class Main {
         System.out.println("User B allowed: " + allowedB);
 
         printResult(
-            allowedA == capacity &&
-            allowedB == capacity
-        );
+                allowedA == capacity &&
+                        allowedB == capacity);
     }
 
     // ==========================================
@@ -296,9 +332,9 @@ public class Main {
     // ==========================================
 
     private static void testConcurrent(
-        String name,
-        Supplier<RateLimiter> limiterSupplier,
-        int expectedAllowed) throws InterruptedException {
+            String name,
+            Supplier<RateLimiter> limiterSupplier,
+            int expectedAllowed) throws InterruptedException {
 
         System.out.println("\n--- " + name + " : Concurrent Test ---");
 
@@ -307,17 +343,13 @@ public class Main {
         int numberOfThreads = 20;
         int requestsPerThread = 10;
 
-        ExecutorService executor =
-            Executors.newFixedThreadPool(numberOfThreads);
+        ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
 
-        CountDownLatch ready =
-            new CountDownLatch(numberOfThreads);
+        CountDownLatch ready = new CountDownLatch(numberOfThreads);
 
-        CountDownLatch start =
-            new CountDownLatch(1);
+        CountDownLatch start = new CountDownLatch(1);
 
-        CountDownLatch done =
-            new CountDownLatch(numberOfThreads);
+        CountDownLatch done = new CountDownLatch(numberOfThreads);
 
         AtomicInteger allowedCount = new AtomicInteger(0);
         AtomicInteger rejectedCount = new AtomicInteger(0);
@@ -369,21 +401,19 @@ public class Main {
         System.out.println("Threads: " + numberOfThreads);
         System.out.println("requests Per Thread: " + requestsPerThread);
         System.out.println("Total requests: "
-            + (numberOfThreads * requestsPerThread));
+                + (numberOfThreads * requestsPerThread));
 
         System.out.println("Allowed: " + allowedCount.get());
         System.out.println("Rejected: " + rejectedCount.get());
 
         System.out.println("Execution time: "
-            + TimeUnit.NANOSECONDS.toMillis(endTime - startTime)
-            + " ms");
+                + TimeUnit.NANOSECONDS.toMillis(endTime - startTime)
+                + " ms");
 
         printResult(
-            completed &&
-            allowedCount.get() == expectedAllowed &&
-            rejectedCount.get() ==
-                (numberOfThreads * requestsPerThread - expectedAllowed)
-        );
+                completed &&
+                        allowedCount.get() == expectedAllowed &&
+                        rejectedCount.get() == (numberOfThreads * requestsPerThread - expectedAllowed));
     }
 
     // ==========================================
