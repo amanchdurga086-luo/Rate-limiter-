@@ -54,5 +54,14 @@ class TokenBucketStrategyTest {
         assertTrue(strategy.allow("user2").isAllowed());
     }
 
+    @Test
+    void shouldReturnFullCapacityForNewUser() {
+
+        assertEquals(
+            3,
+            strategy.getRemainingCapacity("new-user")
+        );
+    }
+
     
 }
