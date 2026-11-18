@@ -34,5 +34,15 @@ class TokenBucketStrategyTest {
         assertTrue(strategy.allow("user1").isAllowed());
     }
 
+    @Test
+    void shouldRejectRequestsWhenBucketIsEmpty() {
+
+        strategy.allow("user1");
+        strategy.allow("user1");
+        strategy.allow("user1");
+
+        assertFalse(strategy.allow("user1").isAllowed());
+    }
+
     
 }
