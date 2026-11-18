@@ -63,5 +63,17 @@ class TokenBucketStrategyTest {
         );
     }
 
-    
+    @Test
+    void shouldRejectNullOrEmptyUserKey() {
+
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> strategy.allow(null)
+        );
+
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> strategy.allow("")
+        );
+    }
 }
