@@ -44,5 +44,15 @@ class TokenBucketStrategyTest {
         assertFalse(strategy.allow("user1").isAllowed());
     }
 
+    @Test
+    void shouldMaintainIndependentBucketsForDifferentUsers() {
+
+        strategy.allow("user1");
+        strategy.allow("user1");
+        strategy.allow("user1");
+
+        assertTrue(strategy.allow("user2").isAllowed());
+    }
+
     
 }
