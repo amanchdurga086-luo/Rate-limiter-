@@ -14,5 +14,9 @@ public class FakeClock implements Clock {
         this(0);
     }
 
+    public FakeClock(long initialTimeNanos) {
+        this.currentTimeNanos = new AtomicLong(initialTimeNanos);
+    }
+
     
 }
