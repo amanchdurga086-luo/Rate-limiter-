@@ -40,5 +40,11 @@ public class FakeClock implements Clock {
         currentTimeNanos.addAndGet(unit.toNanos(amount));
     }
 
-    
+    public void advanceSeconds(long seconds) {
+        advance(seconds, TimeUnit.SECONDS);
+    }
+
+    public void advanceMillis(long millis) {
+        advance(millis, TimeUnit.MILLISECONDS);
+    }
 }
