@@ -23,5 +23,22 @@ public class FakeClock implements Clock {
         return currentTimeNanos.get();
     }
 
+    public void advance(long amount, TimeUnit unit) {
+
+        if (amount < 0) {
+            throw new IllegalArgumentException(
+                "Time cannot move backwards"
+            );
+        }
+
+        if (unit == null) {
+            throw new IllegalArgumentException(
+                "TimeUnit cannot be null"
+            );
+        }
+
+        currentTimeNanos.addAndGet(unit.toNanos(amount));
+    }
+
     
 }
