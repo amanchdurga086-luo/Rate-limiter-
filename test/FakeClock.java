@@ -18,5 +18,10 @@ public class FakeClock implements Clock {
         this.currentTimeNanos = new AtomicLong(initialTimeNanos);
     }
 
+    @Override
+    public long nanoTime() {
+        return currentTimeNanos.get();
+    }
+
     
 }
