@@ -147,6 +147,15 @@ class RateLimiterConcurrencyTest {
                 strategy.getRemainingCapacity("user-0"));
     }
 
+    @Test
+    void shouldHandleConcurrentLeakyBucketRequestsFromDifferentUsers()
+            throws InterruptedException {
+
+        testConcurrentDifferentUsers(
+                () -> new LeakyBucketStrategy(
+                        50, 1.0, new FakeClock()));
+    }
+
     private void testConcurrentRequests(
             Supplier<RateLimiterStrategy> strategySupplier)
             throws InterruptedException {
