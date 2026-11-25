@@ -167,6 +167,17 @@ class RateLimiterConcurrencyTest {
                         new FakeClock()));
     }
 
+    @Test
+    void shouldHandleConcurrentSlidingWindowRequestsFromDifferentUsers()
+            throws InterruptedException {
+
+        testConcurrentDifferentUsers(
+                () -> new SlidingWindowStrategy(
+                        50,
+                        TimeUnit.MINUTES.toNanos(1),
+                        new FakeClock()));
+    }
+
     private void testConcurrentRequests(
             Supplier<RateLimiterStrategy> strategySupplier)
             throws InterruptedException {
