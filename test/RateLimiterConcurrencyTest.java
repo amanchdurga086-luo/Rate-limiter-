@@ -29,10 +29,8 @@ class RateLimiterConcurrencyTest {
             throws InterruptedException {
 
         testConcurrentRequests(
-            () -> new TokenBucketStrategy(
-                CAPACITY, 1.0, new FakeClock()
-            )
-        );
+                () -> new TokenBucketStrategy(
+                        CAPACITY, 1.0, new FakeClock()));
     }
 
     @Test
@@ -40,10 +38,8 @@ class RateLimiterConcurrencyTest {
             throws InterruptedException {
 
         testConcurrentRequests(
-            () -> new LeakyBucketStrategy(
-                CAPACITY, 1.0, new FakeClock()
-            )
-        );
+                () -> new LeakyBucketStrategy(
+                        CAPACITY, 1.0, new FakeClock()));
     }
 
     @Test
@@ -51,12 +47,10 @@ class RateLimiterConcurrencyTest {
             throws InterruptedException {
 
         testConcurrentRequests(
-            () -> new FixedWindowStrategy(
-                CAPACITY,
-                TimeUnit.MINUTES.toNanos(1),
-                new FakeClock()
-            )
-        );
+                () -> new FixedWindowStrategy(
+                        CAPACITY,
+                        TimeUnit.MINUTES.toNanos(1),
+                        new FakeClock()));
     }
 
     @Test
@@ -64,12 +58,93 @@ class RateLimiterConcurrencyTest {
             throws InterruptedException {
 
         testConcurrentRequests(
-            () -> new SlidingWindowStrategy(
-                CAPACITY,
-                TimeUnit.MINUTES.toNanos(1),
-                new FakeClock()
-            )
-        );
+                () -> new SlidingWindowStrategy(
+                        CAPACITY,
+                        TimeUnit.MINUTES.toNanos(1),
+                        new FakeClock()));
+    }
+
+    @Test
+    void shouldHandleConcurrentRequestsFromDifferentUsers()
+            throws InterruptedException {
+
+        int userCount = 20;
+        int requestsPerUser = 50;
+
+        int capacityPerUser = 50;
+
+        RateLimiterStrategy strategy = new TokenBucketStrategy(
+                capacityPerUser,
+                1.0,
+                new FakeClock());
+
+        ExecutorService executor = Executors.newFixedThreadPool(userCount);
+
+        CountDownLatch ready = new CountDownLatch(userCount);
+
+        CountDownLatch start = new CountDownLatch(1);
+
+        CountDownLatch done = new CountDownLatch(userCount);
+
+        AtomicInteger allowedCount = new AtomicInteger(0);
+        AtomicInteger rejectedCount = new AtomicInteger(0);
+
+        try {
+
+            for (int i = 0; i < userCount; i++) {
+
+                final String userKey = "user-" + i;
+
+                executor.submit(() -> {
+
+                    ready.countDown();
+
+                    try {
+                        start.await();
+
+                        for (int j = 0; j < requestsPerUser; j++) {
+
+                            if (strategy.allow(userKey).isAllowed()) {
+                                allowedCount.incrementAndGet();
+                            } else {
+                                rejectedCount.incrementAndGet();
+                            }
+                        }
+
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+
+                    } finally {
+                        done.countDown();
+                    }
+                });
+            }
+
+            assertTrue(
+                    ready.await(5, TimeUnit.SECONDS),
+                    "Workers did not become ready");
+
+            start.countDown();
+
+            assertTrue(
+                    done.await(10, TimeUnit.SECONDS),
+                    "Concurrent test timed out");
+
+        } finally {
+
+            start.countDown();
+            executor.shutdownNow();
+        }
+
+        int expectedAllowed = userCount * capacityPerUser;
+
+        assertEquals(expectedAllowed, allowedCount.get());
+
+        assertEquals(0, rejectedCount.get());
+
+        assertEquals(
+                0,
+                strategy.getRemainingCapacity("user-0"));
     }
 
     private void testConcurrentRequests(
@@ -78,20 +153,17 @@ class RateLimiterConcurrencyTest {
 
         RateLimiterStrategy strategy = strategySupplier.get();
 
-        ExecutorService executor =
-            Executors.newFixedThreadPool(THREAD_COUNT);
+        // Creates a pool of 20 worker threads
+        ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
 
-            // Wait until all 20 threads are prepared
-        CountDownLatch ready =
-            new CountDownLatch(THREAD_COUNT);
+        // Wait until all 20 threads are prepared
+        CountDownLatch ready = new CountDownLatch(THREAD_COUNT);
 
-            // Release all threads together to start sending requests
-        CountDownLatch start =
-            new CountDownLatch(1);
+        // Release all threads together to start sending requests
+        CountDownLatch start = new CountDownLatch(1);
 
-            // Wait until all threads finish
-        CountDownLatch done =
-            new CountDownLatch(THREAD_COUNT);
+        // Wait until all threads finish
+        CountDownLatch done = new CountDownLatch(THREAD_COUNT);
 
         AtomicInteger allowedCount = new AtomicInteger(0);
         AtomicInteger rejectedCount = new AtomicInteger(0);
@@ -110,12 +182,9 @@ class RateLimiterConcurrencyTest {
                         // Wait until all workers are ready.
                         start.await();
 
-                        for (int j = 0;
-                             j < REQUESTS_PER_THREAD;
-                             j++) {
+                        for (int j = 0; j < REQUESTS_PER_THREAD; j++) {
 
-                            boolean allowed =
-                                strategy.allow(userKey).isAllowed();
+                            boolean allowed = strategy.allow(userKey).isAllowed();
 
                             if (allowed) {
                                 allowedCount.incrementAndGet();
@@ -135,18 +204,16 @@ class RateLimiterConcurrencyTest {
 
             // Ensure all threads are ready.
             assertTrue(
-                ready.await(5, TimeUnit.SECONDS),
-                "Workers did not become ready in time"
-            );
+                    ready.await(5, TimeUnit.SECONDS),
+                    "Workers did not become ready in time");
 
             // Release all workers together.
             start.countDown();
 
             // Wait for all requests to finish.
             assertTrue(
-                done.await(10, TimeUnit.SECONDS),
-                "Concurrent test timed out"
-            );
+                    done.await(10, TimeUnit.SECONDS),
+                    "Concurrent test timed out");
 
         } finally {
 
@@ -156,23 +223,19 @@ class RateLimiterConcurrencyTest {
             executor.shutdownNow();
         }
 
-        int totalRequests =
-            THREAD_COUNT * REQUESTS_PER_THREAD;
+        int totalRequests = THREAD_COUNT * REQUESTS_PER_THREAD;
 
         assertEquals(
-            totalRequests,
-            allowedCount.get() + rejectedCount.get()
-        );
+                totalRequests,
+                allowedCount.get() + rejectedCount.get());
 
         assertEquals(
-            CAPACITY,
-            allowedCount.get(),
-            "Allowed requests must not exceed capacity"
-        );
+                CAPACITY,
+                allowedCount.get(),
+                "Allowed requests must not exceed capacity");
 
         assertEquals(
-            totalRequests - CAPACITY,
-            rejectedCount.get()
-        );
+                totalRequests - CAPACITY,
+                rejectedCount.get());
     }
 }
