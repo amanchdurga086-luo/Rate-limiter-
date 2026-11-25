@@ -184,7 +184,7 @@ class RateLimiterConcurrencyTest {
 
         int userCount = 20;
         int requestsPerUser = 50;
-        int capacityPerUser = 50;
+        // int capacityPerUser = 50;
 
         RateLimiterStrategy strategy = strategySupplier.get();
 
