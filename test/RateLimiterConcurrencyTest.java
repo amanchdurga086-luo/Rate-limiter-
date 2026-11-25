@@ -178,6 +178,78 @@ class RateLimiterConcurrencyTest {
                         new FakeClock()));
     }
 
+    private void testConcurrentDifferentUsers(
+            Supplier<RateLimiterStrategy> strategySupplier)
+            throws InterruptedException {
+
+        int userCount = 20;
+        int requestsPerUser = 50;
+        int capacityPerUser = 50;
+
+        RateLimiterStrategy strategy = strategySupplier.get();
+
+        ExecutorService executor = Executors.newFixedThreadPool(userCount);
+
+        CountDownLatch ready = new CountDownLatch(userCount);
+        CountDownLatch start = new CountDownLatch(1);
+        CountDownLatch done = new CountDownLatch(userCount);
+
+        AtomicInteger allowedCount = new AtomicInteger();
+        AtomicInteger rejectedCount = new AtomicInteger();
+
+        try {
+
+            for (int i = 0; i < userCount; i++) {
+
+                final String userKey = "user-" + i;
+
+                executor.submit(() -> {
+
+                    ready.countDown();
+
+                    try {
+                        start.await();
+
+                        for (int j = 0; j < requestsPerUser; j++) {
+
+                            if (strategy.allow(userKey).isAllowed()) {
+                                allowedCount.incrementAndGet();
+                            } else {
+                                rejectedCount.incrementAndGet();
+                            }
+                        }
+
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+
+                    } finally {
+                        done.countDown();
+                    }
+                });
+            }
+
+            assertTrue(ready.await(5, TimeUnit.SECONDS));
+
+            start.countDown();
+
+            assertTrue(done.await(10, TimeUnit.SECONDS));
+
+        } finally {
+            start.countDown();
+            executor.shutdownNow();
+        }
+
+        assertEquals(1000, allowedCount.get());
+        assertEquals(0, rejectedCount.get());
+
+        for (int i = 0; i < userCount; i++) {
+            assertEquals(
+                    0,
+                    strategy.getRemainingCapacity("user-" + i),
+                    "Incorrect remaining capacity for user-" + i);
+        }
+    }
+
     private void testConcurrentRequests(
             Supplier<RateLimiterStrategy> strategySupplier)
             throws InterruptedException {
