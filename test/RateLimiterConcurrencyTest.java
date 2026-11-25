@@ -156,6 +156,17 @@ class RateLimiterConcurrencyTest {
                         50, 1.0, new FakeClock()));
     }
 
+    @Test
+    void shouldHandleConcurrentFixedWindowRequestsFromDifferentUsers()
+            throws InterruptedException {
+
+        testConcurrentDifferentUsers(
+                () -> new FixedWindowStrategy(
+                        50,
+                        TimeUnit.MINUTES.toNanos(1),
+                        new FakeClock()));
+    }
+
     private void testConcurrentRequests(
             Supplier<RateLimiterStrategy> strategySupplier)
             throws InterruptedException {
